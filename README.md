@@ -6,12 +6,13 @@ Mail::SpamAssassin::Plugin::CHAOS, Version 1.0.5
 
 - Usage:
 
-            loadplugin      Mail::SpamAssassin::Plugin::CHAOS               CHAOS.pm
+            ifplugin Mail::SpamAssassin::Plugin::CHAOS
                     header  JR_SUBJ_EMOJI           eval:check_for_emojis()
                     header  JR_FRAMED_WORDS         eval:framed_message_check()
                     header  JR_UNIBABBLE            eval:from_lookalike_unicode()
                     header  JR_TITLECASE            eval:subject_title_case()
                     ...
+             endif
 
 
 # DESCRIPTION
