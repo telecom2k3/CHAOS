@@ -244,4 +244,4 @@ vary depending upon the mailer used.
 
 # AVAILABILITY
 
--  Visit the project's site for the latest updates: \[https://github.com/telecom2k3/CHAOS/\]
+-  Visit the project's site for the latest updates: https://github.com/telecom2k3/CHAOS/
