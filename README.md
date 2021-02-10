@@ -214,7 +214,7 @@ vary depending upon the mailer used.
 
 - See also &lt;https://spamassassin.apache.org/> and &lt;https://wiki.apache.org/spamassassin/> for more information.
 
-- See this project's Wiki for more informaton: &lt;https://https://github.com/telecom2k3/CHAOS/wiki>
+- See this project's Wiki for more informaton: https://https://github.com/telecom2k3/CHAOS/wiki/
 
 # SEE ALSO
 
@@ -226,7 +226,7 @@ vary depending upon the mailer used.
 
 - While I do follow the SA-User's List, please do NOT report bugs there.
 
-- If at all possible, please use the issue tracker at GitHub to report problems and request any additional features:  &lt;https://github.com/telecom2k3/YARAssassin/issues>  You can also report the problem to me via E-Mail.  See the AUTHOR section for contact information.
+- If at all possible, please use the issue tracker at GitHub to report problems and request any additional features:  https://github.com/telecom2k3/CHAOS/issues  You can also report the problem by E-Mail.  See the AUTHOR section for contact information.
 
 # AUTHOR
 
@@ -244,4 +244,4 @@ vary depending upon the mailer used.
 
 # AVAILABILITY
 
--  Visit the project's site for the latest updates: https://github.com/telecom2k3/CHAOS/
+- Visit the project's site for the latest updates: https://github.com/telecom2k3/CHAOS/
