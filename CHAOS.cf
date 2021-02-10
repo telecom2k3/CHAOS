@@ -1,4 +1,3 @@
-loadplugin Mail::SpamAssassin::Plugin::CHAOS 	CHAOS.pm
 ifplugin Mail::SpamAssassin::Plugin::CHAOS
 
     # Set this to the level at which emails are tagged as spam.
