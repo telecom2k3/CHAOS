@@ -1,18 +1,23 @@
 # NAME
 
-Mail::SpamAssassin::Plugin::CHAOS, Version 1.0.5
+Mail::SpamAssassin::Plugin::CHAOS, Version 1.1.0
 
 # SYNOPSIS
 
 - Usage:
 
             ifplugin Mail::SpamAssassin::Plugin::CHAOS
-                    header  JR_SUBJ_EMOJI           eval:check_for_emojis()
-                    header  JR_FRAMED_WORDS         eval:framed_message_check()
-                    header  JR_UNIBABBLE            eval:from_lookalike_unicode()
-                    header  JR_TITLECASE            eval:subject_title_case()
+                    chaos_mode Manual
+                    header          JR_UNIBABBLE            eval:from_lookalike_unicode()
+                    describe        JR_UNIBABBLE        Frome Name Character Spoofs
+                    score           JR_UNIBABBLE            3.0
                     ...
-             endif
+                    header          JR_SUBJ_EMOJI           eval:check_for_emojis()
+                    header          JR_FRAMED_WORDS         eval:framed_message_check()
+                    header          JR_TITLECASE            eval:subject_title_case()
+                    ...
+            endif
+
 
 
 # DESCRIPTION
@@ -25,13 +30,17 @@ This plugin demonstrates SpamAssassin's relatively new (3.4) dynamic scoring cap
         + Dynamic, Variable, and Conditional scoring.
         + Adaptive scoring (baseline reference).
 
-This is a self-describing and self-scoring module.
+This module can operate in the following modes:
+
+- "Tag" mode sets the scores for all rules produced to a callout level of 0.01.  You can add or change rulenames using these Evals, but the description and soore remain fixed.  This is useful when first integrating this module into an existing SA system.  This is the default mode of operation.
+- "Manual" mode allows you, the user, to set the Name, Describe, and Score fields for each Eval; in traditional SA fashion.
+- "AutoISP" mode allows you to quickly scale the rules to ranges suitable for ISP/ESP use.
 
 ## Adaptive Scoring Configuration
 
-- The rules provided by thie module are self-scoring.  The scores are set to
+- The rules provided by thie module are auto-scoring.  The scores are set to
 a percentage of three values, the value at which mail is (1) Tagged as Spam,
-(2) invokes Evasive Actions, and (3) Final Destinaltion/Silent Discard.
+(2) invokes Evasive Actions, and (3) Final Destination/Silent Discard.
 These values must be set in the .cf configuration file.
 
     For example, if a particular rule scores 4.5 on this mail system, the rule
@@ -43,11 +52,11 @@ These values must be set in the .cf configuration file.
         --------------
             chaos_tag 7
             chaos_high 14
-            chaos_max 28
+            chaos_max 25
 
 
 - In a pure-play, basic SpamAssassin environment, try setting these all these
-values to 5.
+values to 4.
 
 # METHODS
 
@@ -57,75 +66,280 @@ values to 5.
 
 ## check\_for\_brackets()
 
-- Got 5 or more brackety-like characters?  This is a Subject header test
-for Left and Right, Brackets, Braces, and Parens.  This includes Unicode
-varients.  The total number of brackets is returned and the rule
-JR\_HAS\_MANY\_BRACKETS is set.
+- This is a Subject header test for Left and Right, Brackets, Braces, Parenthesis and their Unicode varients.  These are sometimes called Set, Framing, or Grouping Characters.  In Tag mode, JR\_SUBJ\_BRACKETS is set to a callout value of 0.01.  In AutoISP mode, JR\_SUBJ\_BRACKETS is variable based upon the number of brackets over the limit.  In Manual mode, <YOUR\_RULENAME> is scored with whatever <YOUR\_SCORE> and <YOUR\_DESCRIBE>, in the standard SpamAssassin fashion.
 
-- The rule's description will reflect the number of characters
-matched: "CHAOS.pm dynamic score.  Count: $totalcount"
+- In ALL modes, a callout is set containing the exact number of bracket characters detected.  The rulename, JR\_SUBJ\_BRACKETS or <YOUR\_RULENAME> is appended with an "\_$count" whose score is 0.01. Example: YOUR\_RULENAME\_3.
 
-## check\_bracket\_balance()
+## check\_from\_brackets()
 
-- This is a Subject header test for Left and Right, Brackets, Braces, and
-Parens.  This includes Unicode varients.  If there's a difference between
-the numer of Left and Right brackets AND there are a total of 4 or more
-bracket characters, the rule JR\_UNBALANCED\_BRACKETS is set.
+- This is a test of the From Name field for Left, Right, Brackets, Braces, Parenthesis and their Unicode varients.  In Tag mode, JR\_FROM\_BRACKETS is set to a callout value of 0.01.  In AutoISP mode, JR\_FROM\_BRACKETS is variable based upon the number of brackets over the limit.  In Manual mode, <YOUR\_RULENAME> is scored with whatever <YOUR\_SCORE> and <YOUR\_DESCRIBE>, in the standard SpamAssassin fashion.
 
-- The rule's description will reflect the number of characters
-matched: "CHAOS.pm dynamic score.  Count: $totalcount"
+- In ALL modes, a callout is set containing the exact number of bracket characters detected.  The rulename, JR\_FROM\_BRACKETS or <YOUR\_RULENAME> is appended with an "\_$count" whose score is 0.01. Example: YOUR\_RULENAME\_3.
 
-## subject\_title\_case()
+## framed\_message\_check()
 
-- This is a Subject header test that detects the presence of all
-Title Case (Proper Case) words.  The rule, JR\_TITLECASE, is set with a
-fixed score of ${chaos\_tag} \* 0.28.
+- This is a Subject header test that looks for the presence of Framed /
+Bracketed words, lie: \[URGENT\].  All standard Parens, Brackets, and Braces are
+supported, along with Unicode variants!  In The Auto and Tag modes, the rule's
+description will reflect the number of instances found.
 
-## check\_for\_emojis()
-
-- This is a Subject header test that looks for the Unicode representations
-of Emojis.  The rule's description will reflect the number of Emojis found:
-"CHAOS.pm dynamic score.  Count: $totalcount"
-
-- This rule, JR\_SUBJ\_EMOJI, has a variable score based upon the number of
-Emojis found.
-
-## from\_has\_emojis()
-
-- This tests the FROM, REPLY-TO, and TO Name fields for the presence of
- unicode Emojis.  The rule's description will reflect the number of Emojis found:
-"CHAOS.pm dynamic score.  Count: $totalcount"
-
-- This check can return three rules: JR\_FROM\_EMOJI, JR\_TO\_EMOJI, JR\_REPLYTO\_EMOJI
+- In Auto mode this score is variable, based upon the number of matches at or above
+the defined count.  The default() count is 1.  When running in Tag mode, the score is
+set to a callout level of 0.01.
 
 ## framed\_digit\_check()
 
 - This is a Subject header test that looks for the presence of Framed /
 Bracketed digits \[4\].  All standard Parens, Brackets, and Braces are
-supported, along with Unicode variants.  The rule's description
-will reflect the number of Framed/Bracketed Digits found:
-"CHAOS.pm dynamic score. Count: $framed"
+supported, along with Unicode variants.  In The Auto and Tag modes, the
+rule's description will reflect the number of instances found.
 
-- This score is variable, based upon the number of framed-digits detected.
-Using the defaults, a single match is scored at: $score = ${chaos\_tag} \* 0.35
-while multiple matches are scored at: $score = ${chaos\_tag} \* 0.46 \* $framed
+- In Auto mode, the score is variable, based upon the number of framed
+digits at, or over, the defined count.  The default() count is 2.
 
-## framed\_message\_check()
+## check\_for\_emojis()
 
-- This is a Subject header test that looks for the presence of Framed /
-Bracketed words \[URGENT\].  All standard Parens, Brackets, and Braces are
-supported, along with Unicode variants!  The rule's description
-will reflect the number of instances found:
-"CHAOS.pm dynamic score. Count: $framed"
+- This is a Subject header test that looks for Unicode Emojis.  In Tag
+mode JR\_SUBJ\_EMOJIS, or <YOUR\_RULENAME>, is set to a callout value of 0.01.
+In AutoISP mode, JR\_SUBJ\_EMOJIS has a variable score based upon the number
+of Emojis at, exceeding, the hit count.  In Manual mode, <YOUR\_RULENAME>
+is scored with whatever <YOUR\_SCORE> and <YOUR\_DESCRIBE>, in the standard
+SpamAssassin fashion.  The Default() hit count is 3.
 
-- This score is variable, based upon the number of matches.
+- In ALL modes, a callout is set containing the exact number of bracket
+characters detected.  The rulename, JR\_SUBJ\_EMOJIS or <YOUR\_RULENAME> is
+appended with an "\_$count" whose score is 0.01. Example: YOUR\_RULENAME\_3.
+The rule's description will reflect the number of Emojis found.
+
+## check\_from\_emojis()
+
+- This is a test of the From Name field that looks for Unicode Emojis.
+In Tag mode JR\_FROM\_EMOJIS, or <YOUR\_RULENAME>, is set to a callout value of
+0.01.  In AutoISP mode, JR\_FROM\_EMOJIS has a variable score based upon the
+number of Emojis at, or exceeding, the hit count.  In Manual mode,
+<YOUR\_RULENAME> is scored with whatever <YOUR\_SCORE> and <YOUR\_DESCRIBE>,
+in the standard SpamAssassin fashion.
+
+- The Default() hit count is 1.
+
+## check\_replyto\_emojis()
+
+- This tests the Reply-To Name field for Unicode Emojis.
+In Tag mode JR\_FROM\_EMOJIS, or <YOUR\_RULENAME>, is set to a callout value of
+0.01.  In AutoISP mode, JR\_FROM\_EMOJIS has a variable score based upon the
+number of Emojis at, or exceeding, the hit count.  In Manual mode,
+<YOUR\_RULENAME> is scored with whatever <YOUR\_SCORE> and <YOUR\_DESCRIBE>,
+in the standard SpamAssassin fashion.
+
+- The Default() hit count is 1.
 
 ## useless\_utf\_check()
 
-- This is a Subject header test that looks for the presence of useless
-Unicode filler characters: "CHAOS.pm dynamic score. Count: $totalcount"
+- This tests the Subject for useless UTF-8 characters and hits when the
+defined count is reached.  In Tag mode JR\_SUBJ\_UTF\_MISUSE, or <YOUR\_RULENAME>,
+is set to a callout value of 0.01.  In AutoISP mode, JR\_SUBJ\_UTF\_MISUSE has a
+variable score based upon the number of these UTF characters at, or over, the
+limit.
 
-- This score is variable, based upon the number of framed-digits detected.
+- In Manual mode, <YOUR\_RULENAME> is scored with whatever <YOUR\_SCORE>
+and <YOUR\_DESCRIBE>, in the standard SpamAssassin fashion.
+
+- The Default() hit count is 4.
+
+## from\_lookalike\_unicode()
+
+- This checks the From Name field for the presence of multiple Unicode
+Alphabets.  Spammers use these "Look-Alike" characters for spoofing.  This
+sets the maximum number of Alphabets that can appear here.  This is almost
+always 1; a single Character Code Set.  This will detect most of the From
+Name character spoofs.
+
+- In Tag mode JR\_UNIBABBLE, or <YOUR\_RULENAME>, is set to a callout
+value of 0.01.  In Manual mode JR\_UNIBABBLE, or <YOUR\_RULENAME>, may be
+Scored and Described in standard SA fashion.
+
+- In Tag mode JR\_UNIBABBLE, or <YOUR\_RULENAME>, is scored at a callout
+value of 0.01.  In Manual mode JR\_UNIBABBLE, or <YOUR\_RULENAME>, may be
+Scored and Described in standard SA fashion.   In Auto mode, JR\_UNIBABBLE
+is scored variably, depending upon the amount over the defined threshold.
+
+## subj\_lookalike\_unicode()
+
+- This checks the email Subject for the presence of multiple Unicode
+Alphabets.  Spammers use these "Look-Alike" characters for spoofing.  This
+sets the maximum number of Alphabets that can appear here.  Usually a value
+of 1 works, but some Some professionals and academia may want to set this
+value to 2 to accomodate Math or Engineering Unicode symbols.
+
+- In Tag mode JR\_SUBJ\_BABBLE, or <YOUR\_RULENAME>, is set to a callout
+value of 0.01.  In Manual mode JR\_SUBJ\_BABBLE, or <YOUR\_RULENAME>, may be
+Scored and Described in standard SA fashion.  In Auto mode, JR\_SUBJ\_BABBLE
+is scored variably, depending upon the amount over the defined threshold.
+
+## from\_enclosed\_chars()
+
+- This checks the From Name field for the presence of Unicode Enclosed/
+Encircled Latin characters.  These are often used in spam.
+
+- In Tag mode JR\_FROM\_ENC\_CHARS, or <YOUR\_RULENAME>, is set to a
+callout value of 0.01.  In Manual mode JR\_FROM\_ENC\_CHARS, or
+<YOUR\_RULENAME>, may be Scored and Described in standard SA fashion.
+
+> In Auto mode, JR\_FROM\_ENC\_CHARS is scored variably, depending upon the
+> amount over the defined threshold.
+
+## from\_enclosed\_chars()
+
+- This checks the email Subject for the presence of Unicode Enclosed/
+Encircled Latin characters.  These are often used in spam.
+
+- In Tag mode JR\_SUBJ\_ENC\_CHARS, or <YOUR\_RULENAME>, is set to a
+callout value of 0.01.  In Manual mode JR\_SUBJ\_ENC\_CHARS, or
+<YOUR\_RULENAME>, may be Scored and Described in standard SA fashion.
+
+> In Auto mode, JR\_SUBJ\_ENC\_CHARS is scored variably, depending upon the
+> amount over the defined threshold.
+
+## subject\_title\_case()
+
+- This is a Subject header test that detects the presence of all Title Case
+(Proper Case) words.  The rule, JR\_TITLECASE, is set with a fixed score in Auto
+mode and a 0.01 callout value in Tag mode.  In Manual mode, <YOUR\_RULENAME>
+is scored with whatever <YOUR\_SCORE> and <YOUR\_DESCRIBE>, in the standard
+SpamAssassin fashion.
+
+- The number of words that must be in the Subject is a tunable value.  The
+default value() is 4.
+
+## check\_replyto\_length()
+
+- This checks the length of the Reply-To field.  When the length is
+excessive the rule, JR\_LONG\_REPLYTO, is set.  This is a fixed score in
+Auto mode and a 0.01 callout value in Tag mode.  In Manual mode,
+<YOUR\_RULENAME> is scored  with whatever <YOUR\_SCORE> and <YOUR\_DESCRIBE>,
+in the standard  SpamAssassin fashion.
+
+- The number of \*characters\* that can appear in the Reply-To field is
+tunable.  The default value() is 175.
+
+## check\_cc\_public\_name()
+
+- This is a Header test of the CC field.  If a valid Name cannot be found
+and the number of CC Email Addresses hits a tunable number, then the rule,
+JR\_CC\_PUB\_NONAME, is set (In Auto mode).  In Manual mode the rule's name, the
+description, and the score can be set as needed.  In Tag mode, the score is
+fixed at a 0.01 callout level.
+
+- The default() number of CC Email Addresses that must be present is 25.
+
+- Public Emails are not necessarily FREEMAILs.  These Email addresses
+include common Network/Carrier addresses, like "verizon.net" or "comcast.net".
+These represent the top 100 or so Email systems, world-wide.
+
+## check\_to\_public\_name()
+
+- This is a Header test of the TO field.  If a valid Name cannot be found
+and the number of TO Email Addresses hits a tunable number, then the rule,
+JR\_TO\_PUB\_NONAME, is set (In Auto mode).  In Manual mode the rule's name, the
+description, and the score can be set as needed.  In Tag mode, the score is
+fixed at a 0.01 callout level.
+
+- The default() number of TO Email Addresses that must be present is 50.
+
+- Public Emails are not necessarily FREEMAILs.  These Email addresses
+include common Network/Carrier addresses, like "verizon.net" or "comcast.net".
+These represent the top 100 or so Email systems, world-wide.
+
+## check\_pub\_shorturls()
+
+- This is a test of URIs in the message body, looking for URL Shortener
+services.  These services are grouped as Public (bit.ly, etc.) and Private
+(wpo.st, etc.).  When a match is found, the rule JR\_PUB\_SHORTURL (in Auto
+ mode) is set and the scoring of the rule is variable depending upon the count
+ of Public URL Shorteners found above the defined limit, which is 1 by default.
+
+- In Tag mode, the rule  The rule, JR\_PUB\_SHORTURL or <YOUR\_RULENAME>
+ is set to a callout value of 0.01.  In Manual mode, the rule can be <NAMED>,
+ <DESCRIBED> and <SCORED> in standard SpamAssassin fashion.
+
+## check\_priv\_shorturls()
+
+- This is a test of URIs in the message body, looking for URL Shortener
+services.  These services are grouped as Public (bit.ly, etc.) and Private
+(wpo.st, etc.).  When a match is found, the rule JR\_PRIV\_SHORTURL (in Auto
+ mode) is set and the scoring of the rule is variable depending upon the count
+ of Private URL Shorteners found above the defined limit, which is 1 by default.
+
+- In Tag mode, the rule  The rule, JR\_PRIV\_SHORTURL or <YOUR\_RULENAME>
+is set to a callout value of 0.01.  In Manual mode, the rule can be <NAMED>,
+<DESCRIBED>, and <SCORED> in standard SpamAssassin fashion.
+
+## check\_honorifics()
+
+- This tests the From Name field for honorifics (Mr./Mrs./Miss/Barrister,
+etc) and if found, the rule JR\_HONORIFICS, is set (Auto Mode).  This is a
+fixed score in Auto mode and a 0.01 callout value in Tag mode.
+
+- In Manual mode, <YOUR\_RULENAME> is scored  with whatever <YOUR\_SCORE>
+and <YOUR\_DESCRIBE>, in the standard  SpamAssassin fashion.
+
+## from\_in\_subject()
+
+- This tests looks for the presence of the From Name field in the Subject.
+If so, rule JR\_SUBJ\_HAS\_FROM\_NAME is set in Auto Mode and scored at a fixed
+level.  In Tag mode, JR\_SUBJ\_HAS\_FROM\_NAME or <YOUR\_RULENAME> is scored at a
+callout value of 0.01.
+
+- In Manual mode, JR\_SUBJ\_HAS\_FROM\_NAME or <YOUR\_RULENAME> is scored and
+described in the standard SA fasion.
+
+## first\_name\_basis()
+
+- This tests the From Name field for the use of a single First Name.
+The match includes some first name variants, like "Mr. Jared", "Jared at
+home", or First Name and Last Initial.  In Auto mode, the rule
+JR\_FRM\_FRSTNAME is scored with a fixed score.
+
+- In Tag mode, JR\_FRM\_FRSTNAME or <YOUR\_RULENAME> is set and scored
+with a callout value of 0.01.
+
+- In Manual mode, you many name this rule whatever you like and
+<YOUR\_RULENAME> is scored and described in standard SA fashion.
+
+## from\_no\_vowels()
+
+- This tests the From Name for gibberish.  If there are space-separated
+ word characters but no vowels present, the rule is matched.  The rule
+ JR\_FROM\_NO\_VOWEL is scored at a fixed rate in Auto mode and scored with a
+ callout value of 0.01 in Tag mode.
+
+- In Manual mode, JR\_FROM\_NO\_VOWEL or <YOUR\_RULENAME> is scored and
+described in the standard SA fasion.
+
+## check\_admin\_fraud()
+
+- This is a Subject header test for Admin Fraud \[Account Disabled, Over
+Quota, etc.\] messages.  Also included are Subject header tests for the old
+SOBIG and SOBER worms.  In Auto mode, JR\_ADMIN\_FRAUD is set to a high watermark
+value of ${chaos\_high}; one of two rules herein that score as such.
+
+- In Tag mode the rulename can be whatever you like, however the score is
+fixed at a callout level of 0.01.  In Manual mode, you may name the rule,
+describe it, and score it as desired, in standard SA fashion.
+
+## check\_admin\_fraud\_body()
+
+- This is a Body test that looks for Admin Fraud \[Account Disabled, Quota
+Exceeded, etc.\] messages.  This test is more expensive than standard Body
+rules which are pre-compiled with RE2C.  It's not bad, but still something to
+consider.
+
+    In Auto mode, JR\_ADMIN\_BODY is set to a high watermark value of ${chaos\_high};
+    one of two rules herein that score as such.
+
+- In Tag mode the rulename can be whatever you like, however the score is
+fixed at a callout level of 0.01.  In Manual mode, you may name the rule,
+describe it, and score it in standard SA fashion.
 
 ## check\_for\_sendgrid()
 
@@ -136,80 +350,64 @@ JR\_HAS\_SENDGRID is scored appropriately, 0.35 \* ${chaos\_tag} and described:
 - If Sendgrid headers are present, there is another test for their X-SG-EID
 header.  If not present, the score returned is: ${chaos\_tag}.
 
-## check\_honorifics()
-
-- This tests the From Name field for honorifics; Mr./Mrs./Miss/Barrister/etc.
-If found, rule JR\_HONORIFICS is set and scored at: 0.33 \* ${chaos\_tag}.
-
-## from\_in\_subject()
-
-- This tests looks for the presence of the From Name field in the Subject.
-If so, rule JR\_SUBJ\_HAS\_FROM\_NAME is set, scored at: 0.6 \* ${chaos\_tag}.
-
 ## mailer\_check()
 
-- Picks up the usual bad crappy mailers and services.  Rules returned
-are JR\_MAILER\_BAT, JR\_MAILER\_PHP, JR\_CHILKAT, JR\_MAILKING, JR\_SENDBLUE,
-JR\_APPLE\_XMAIL, JR\_GEN\_XMAILER, JR\_CAMPAIGN\_PRO, and JR\_SWIFTMAILER.  Scores
-vary depending upon the mailer used.
+- Provides a lot of information about the sending system and the E-Mail
+ format.  Rulenames herein are immutable.  In all modes of operation, scores
+ are fixed at a callout level of 0.01 unless marked with an Asterisk.  Those
+ rules are scored in Auto mode only.
 
-## apple\_detect()
+### X-Header Detections
 
-- Detects the Apple-Mail MIME boundary set by Apple in their e-mail applications.  This is a simple callout, and JR\_APPLE\_MIME merely scores at a value of 0.01.
+-
+        JR\_MAILER\_BAT \*              JR\_SENDBLUE \*                 JR\_OUTLOOK\_2003
+        JR\_MAILER\_PHP \*              JR\_GEN\_XMAILER \*             JR\_OUTLOOK\_2007
+        JR\_CHILKAT \*          JR\_ATL\_MAILER                 JR\_OUTLOOK\_2010
+        JR\_MAILKING \*         JR\_SWIFTMAILER \*              JR\_OUTLOOK\_2013
+        JR\_VIRUS\_MAILERS \*   JR\_OUTLOOK\_EXPRESS \* JR\_OUTLOOK\_2016
+    JR\_CAMPAIGN\_PRO \*        JR\_MAROPOST \*                 JR\_MAILCHIMP \*
+        JR\_APPLE\_DEVICE
 
-## check\_utf\_headers()
+### PHP Script Detections
 
-- This tests for the presence of UTF-8 character codesets in the Subject, From, To and Reply-To fields.  The rules: JR\_UTF8\_SUBJ, JR\_UTF8\_FROM, R\_UTF8\_TO, and JR\_UTF8\_REPLYTO are callouts, set to a score of 0.01.
+- This checks for the presence of headers that indicate that the
+ message was sent by a bad or exploited PHP script.  A single immutable
+ rulename with a callout score is returned, unless in Auto mode:
+- JR\_PHP\_SCRIPT
 
-## check\_replyto\_length()
+### UTF-8 Checks
 
-- This checks the length of the Reply-To field.  When the length is excessive the rule, JR\_LONG\_REPLYTO, is set and scored at 0.37 \* ${chaos\_tag}.
-
-## check\_admin\_fraud()
-
-- This is a Subject header test for Admin Fraud \[Account Disabled\] messages.  Also included are Subject header tests for the old SOBIG and SOBER worms.  JR\_ADMIN\_FRAUD is set to a value of ${chaos\_high}.
-
-## check\_admin\_fraud\_body()
-
-- This is a Body test that looks for Admin Fraud \[Account Disabled, Quota Exceeded\] messages.  This test is more expensive than standard Body rules which are pre-compiled with RE2C.  It's not bad, but still something to consider.  JR\_ADMIN\_BODY is set to a value of ${chaos\_high} if a match is detected.
-
-## from\_lookalike\_unicode()
-
-- This is a Header test of the From Name field.  This checks for Unicode "Look-Alike" characters used by Spammers to bypass standard eval tests. The scoring of the rule, JR\_UNIBABBLE, is logarithmic and based upon the number of Unicode characters found.
-
-## check\_for\_url\_shorteners()
-
-- This is a test of URIs in the message body, looking for URL Shortener services.  These services are grouped as Public (bit.ly, etc.) and Private (wpo.st, etc.).  The scoring of the rule, JR\_PUBLIC\_SHORTURL, is linear: ${chaos\_tag} \* 0.25 \* $pubcount + $pubcount \* 1.5.  The rule, JR\_PRIVATE\_SHORTURL is a callout for your use in Meta rules as needed.  It has a fixed score of 0.01.  For both rules, the Description contains a count of the number of Short URL links found.
-
-## check\_php\_script()
-
-- This is a check for miscreant X-PHP-Originating-Script headers.  The rule JR\_PHP\_SCRIPT is set when a header match is detected.  Scores vary, depending upon the PHP script used to send the message.
+- This checks the FROM, TO, REPLY-TO, and SUBJECT headers for Unicode
+ Transformation Format headers, UTF-8.  Thie rulename is immutable and is
+ scored with a callout value of 0.01 in all modes.  The rulenames returned
+ by this Eval describe either Quoted-Printable or Base-64 encodings:
+-
+        JR\_SUBJ\_UTF8\_QP              JR\_SUBJ\_UTF8\_B64
+        JR\_FROM\_UTF8\_QP              JR\_FROM\_UTF8\_B64
+        JR\_TO\_UTF8\_QP                JR\_TO\_UTF8\_B64
+        JR\_REPLY\_UTF8\_QP     JR\_REPLY\_UTF8\_B64
 
 ## id\_attachments()
 
-- This is a check of the 'Content-Type' MIME headers for potentially bad attachments.  These include Archive, MS Office/Works, RTF, PDF, Boot Image, Executable Program, and HTML, file attachments.  These are Callouts, and each have a score of 0.01.
+- This is a check of the 'Content-Type' MIME headers for potentially bad attachments.  These include Archive, MS Office/Works, RTF, PDF, Boot Image, Executable Program, and HTML, file attachments.  These are immutable Callouts, and each have a score of 0.01.
 
-        + JR_ATTACH_ARCHIVE         + JR_ATTACH_RTF
-        + JR_ATTACH_PDF             + JR_ATTACH_BOOTIMG
-        + JR_ATTACH_MSOFFICE        + JR_ATTACH_EXEC
-        + JR_ATTACH_OPENOFFICE      + JR_ATTACH_HTML
-        + JR_ATTACH_RISK
+        JR_ATTACH_ARCHIVE         JR_ATTACH_RTF
+        JR_ATTACH_PDF             JR_ATTACH_BOOTIMG
+        JR_ATTACH_MSOFFICE        JR_ATTACH_EXEC
+        JR_ATTACH_OPENOFFICE      JR_ATTACH_HTML
+        JR_ATTACH_RISK
 
-- JR\_ATTACH\_RISK is rule that is also set if ANY (OR) of the above rules are matched.  Useful in conjunction with Body phrase checks for "Open Me", "Click This" schemes.
+- JR\_ATTACH\_RISK is rule that is also set if ANY of the above rules are matched.
 
-- The following rules are specific callouts for JPG, ZIP, and GZ files.  The callout rule, JR\_ATTACH\_IMAGE, is set when ANY common image attachment is detected.
+- The following immutable rules are specific callouts for JPG, ZIP, and GZ files.
 
-        + JR_ATTACH_ZIP             + JR_ATTACH_GZIP
-        + JR_ATTACH_JPEG            + JR_ATTACH_IMAGE
-
-- There is one scoring rule that matches if an attachment filename equals the message's Subject.  This is scored at 0.58 \* {chaos\_tag}.
-
-        + JR_SUBJ_ATTACH_NAME
+        JR_ATTACH_ZIP               JR_ATTACH_GZIP
+        JR_ATTACH_JPEG              JR_ATTACH_IMAGE
 
 
-## first\_name\_basis()
+- The callout rule, JR\_ATTACH\_IMAGE, is set when ANY (jpg,gif,png,bmp,etc.) common image attachment is detected.
 
-- This tests the From Name field for the use of a single First Name.  The match includes some first name variants, like "Mr. Jared", "Jared at home", or First Name and Last Initial.  If found, rule JR\_FRM\_FRSTNAME is set and scored at: 0.3 \* ${chaos\_tag}.
+- If an attachment filename is the same as the Message Subject, the rule JR\_SUBJ\_ATTACH\_NAME is set.  This is scored at a callout level of 0.01 except in Auto mode.
 
 # MORE DOCUMENTATION
 
