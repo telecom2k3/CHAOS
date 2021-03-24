@@ -357,35 +357,36 @@ header.  If not present, the score returned is: ${chaos\_tag}.
  are fixed at a callout level of 0.01 unless marked with an Asterisk.  Those
  rules are scored in Auto mode only.
 
-### X-Header Detections
+- **X-Header Detections**
 
--
-        JR\_MAILER\_BAT \*              JR\_SENDBLUE \*                 JR\_OUTLOOK\_2003
-        JR\_MAILER\_PHP \*              JR\_GEN\_XMAILER \*             JR\_OUTLOOK\_2007
-        JR\_CHILKAT \*          JR\_ATL\_MAILER                 JR\_OUTLOOK\_2010
-        JR\_MAILKING \*         JR\_SWIFTMAILER \*              JR\_OUTLOOK\_2013
-        JR\_VIRUS\_MAILERS \*   JR\_OUTLOOK\_EXPRESS \* JR\_OUTLOOK\_2016
-    JR\_CAMPAIGN\_PRO \*        JR\_MAROPOST \*                 JR\_MAILCHIMP \*
-        JR\_APPLE\_DEVICE
+            JR_MAILER_BAT *         JR_SENDBLUE *                   JR_OUTLOOK_2003
+            JR_MAILER_PHP *         JR_GEN_XMAILER *                JR_OUTLOOK_2007
+            JR_CHILKAT *        JR_ATL_MAILER                       JR_OUTLOOK_2010
+            JR_MAILKING *       JR_SWIFTMAILER *            JR_OUTLOOK_2013
+            JR_VIRUS_MAILERS *  JR_OUTLOOK_EXPRESS *        JR_OUTLOOK_2016
+        JR_CAMPAIGN_PRO *   JR_MAROPOST *                   JR_MAILCHIMP *
+            JR_APPLE_DEVICE
 
-### PHP Script Detections
+- **PHP Script Detections**
 
 - This checks for the presence of headers that indicate that the
  message was sent by a bad or exploited PHP script.  A single immutable
  rulename with a callout score is returned, unless in Auto mode:
+
 - JR\_PHP\_SCRIPT
 
-### UTF-8 Checks
+- **UTF-8 Checks**
 
 - This checks the FROM, TO, REPLY-TO, and SUBJECT headers for Unicode
  Transformation Format headers, UTF-8.  Thie rulename is immutable and is
  scored with a callout value of 0.01 in all modes.  The rulenames returned
  by this Eval describe either Quoted-Printable or Base-64 encodings:
+
 -
-        JR\_SUBJ\_UTF8\_QP              JR\_SUBJ\_UTF8\_B64
-        JR\_FROM\_UTF8\_QP              JR\_FROM\_UTF8\_B64
-        JR\_TO\_UTF8\_QP                JR\_TO\_UTF8\_B64
-        JR\_REPLY\_UTF8\_QP     JR\_REPLY\_UTF8\_B64
+        JR\_SUBJ\_UTF8\_QP     JR\_SUBJ\_UTF8\_B64
+        JR\_FROM\_UTF8\_QP     JR\_FROM\_UTF8\_B64
+        JR\_TO\_UTF8\_QP       JR\_TO\_UTF8\_B64
+        JR\_REPLY\_UTF8\_QP    JR\_REPLY\_UTF8\_B64
 
 ## id\_attachments()
 
