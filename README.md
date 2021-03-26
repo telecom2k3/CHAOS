@@ -205,7 +205,7 @@ the count to 2: subj\_lookalike\_unicode(2).
 Default()=3
 
 - This checks the From Name field for the presence of Unicode Enclosed/
-Encircled Latin characters.  These are often used in spam.
+Encircled and Mathematical Latin characters.  These are often used in spam.
 
 - In Tag mode JR\_FROM\_ENC\_CHARS, or <YOUR\_RULENAME>, is set to a
  callout value of 0.01.  In Auto mode, JR\_FROM\_ENC\_CHARS is scored variably,
