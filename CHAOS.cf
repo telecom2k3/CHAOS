@@ -1,72 +1,60 @@
 ifplugin Mail::SpamAssassin::Plugin::CHAOS
 
-    # Set this to the level at which emails are tagged as spam.
-	# Equivalent Amavis Parameter: $sa_tag2_level_deflt
-	chaos_tag 7
-	
-	# Set this to your upper spam-level limit.  Amavis: $sa_kill_level_deflt
-    # Only the ADMIN_FRAUD Subject and Body rules use this value.
+    # Set the plugin scoring mode: Tag, Manual, AutoISP - Default: Tag
+    chaos_mode AutoISP
+
+    # Set these values for AutoISP mode
+    chaos_tag 7
 	chaos_high 14
-	
-	# I don't use this yet.  Amavis equivalent: $sa_dsn_cutoff_level
 	chaos_max 28
-
-    ##########################################################################
-	
-    # Total L/R chars tolerated until scoring.  The default()=4.
-	header  JR_HAS_MANY_BRACKETS	eval:check_for_brackets(4)
-
-	# Total L/R Chars above which to detected unbalances.  Default()=4.
-	header  JR_UNBALANCED_BRACKETS  eval:check_bracket_balance(4)
-	
-	# Max Subject Emojis tolerated before scoring.  Default()=1.
-	header	JR_SUBJ_EMOJI			eval:check_for_emojis(1)
-
-	# Max Emojies in a From/To/Reply Name field before scoring. Default()=0.
-	header  JR_FROM_EMOJI           eval:from_to_has_emojis(0)
-
-	# Max Subject Framed/Bracketed Digits before scoring.  Default()=0.
-	header	JR_FRAMED_DIGITS		eval:framed_digit_check(0)
-	
-	# Max Subject Useless Unicode Chars before scoring.  Default()=2.
-	header	JR_HDR_SUBJ_UTF8_CHARS	eval:useless_utf_check(2)
-
-    # Max allowed length of Reply_To Header before scoring.  Default()=175.
-	header  JR_LONG_REPLYTO			eval:check_replyto_length(180)
-	
-	# Minimum Number of Words in the Subject.  Default()=4.
-	header  JR_TITLECASE			eval:subject_title_case()
-	
-	##########################################################################
-	###                 Nothing to set here.....Yet.                       ###
 	##########################################################################
 	
-	header  JR_FRAMED_WORDS			eval:framed_message_check()
-	header	JR_M_FRAMED_WORDS		eval:framed_message_check()
-	header  JR_ADMIN_FRAUD			eval:check_admin_fraud()
-	body	JR_ADMIN_BODY			eval:check_admin_fraud_body()
-	header	JR_UNIBABBLE			eval:from_lookalike_unicode()
-	body	JR_PUBLIC_SHORTURL		eval:check_for_url_shorteners()
-	header	JR_UTF8_SUBJ			eval:check_utf_headers()	  
-	header  JR_HAS_SENDGRID			eval:check_for_sendgrid()
-	header	JR_MAILER				eval:mailer_check()
-	body	JR_APPLE_MIME			eval:apple_detect()
-	header  JR_PHP_SCRIPT			eval:check_php_script()
+	# Framed/Bracketed Counts, Digits, and Words
+  	header  JR_SUBJ_BRACKETS	eval:check_subj_brackets(7)		#Def()=7
+	header  JR_FROM_BRACKETS    eval:check_from_brackets(5)		#Def()=5
+	header  JR_FRAMED_WORDS		eval:framed_message_check(1)	#Def()=1
+	header	JR_FRAMED_DIGITS	eval:framed_digit_check(2)      #Def()=2
+	
+	# Emojis
+	header	JR_SUBJ_EMOJIS		eval:check_for_emojis(3)		#Def()=3
+	header  JR_FROM_EMOJIS		eval:check_from_emojis(1)      	#Def()=1
+	header	JR_REPLYTO_EMOJIS	eval:check_replyto_emojis(1)	#Def()=1
+
+	# Unicode
+	header	JR_SUBJ_UTF_MISUSE	eval:useless_utf_check(4)		#Def()=4
+	header	JR_UNIBABBLE		eval:from_lookalike_unicode(1)	#Def()=1
+	header  JR_SUBJ_BABBLE      eval:subj_lookalike_unicode(1)  #Def()=1
+	header  JR_FROM_ENC_CHARS	eval:from_enclosed_chars(3)		#Def()=3
+	header  JR_SUBJ_ENC_CHARS   eval:subj_enclosed_chars(4)     #Def()=4
+
+    # Lines/Strings
+	header  JR_SUBJ_TITLE_CASE	eval:subject_title_case(4)		#Def()=4
+	header  JR_LONG_REPLYTO		eval:check_replyto_length(175)	#Def()=175
+	header  JR_CC_PUB_NONAME	eval:check_cc_public_name(10)	#Def()=25
+	header  JR_TO_PUB_NONAME	eval:check_to_public_name(50)   #Def()=50
+	
+	# Short URL Detections
+	body	JR_PUB_SHORTURL		eval:check_pub_shorturls(1)  	#Def()=1
+	body	JR_PRIV_SHORTURL	eval:check_priv_shorturls(1)	#Def()=1
+	
+	##############   No options() to set beyond here.....Yet.   ##############
+
+	# From Names
 	header	JR_HONORIFICS			eval:check_honorifics()
 	header  JR_SUBJ_HAS_FROM_NAME   eval:from_in_subject()
-	body    JR_ARCHIVE_ATTACHED		eval:id_attachments()
 	header	JR_FRM_1STNAME			eval:first_name_basis()
+	header	JR_FROM_NO_VOWEL		eval:from_no_vowels()
+		
+    # Admin Fraud Messages
+	header  JR_ADMIN_FRAUD			eval:check_admin_fraud()
+	body	JR_ADMIN_BODY			eval:check_admin_fraud_body()
+
+	#### The following are information callouts only, except in Auto Modes ####
+	
+	header  JR_HAS_SENDGRID			eval:check_for_sendgrid()
+	header	JR_MAILER				eval:mailer_check()
+	body    JR_ARCHIVE_ATTACHED		eval:id_attachments()
+
 	#
 endif
-
-
-# How about some sample rules?
-
-# meta		BIG_BAD1	JR_FRAMED_DIGITS && JR_SUBJ_EMOJI && (JR_APPLE_MIME || JR_APPLE_XMAIL)
-# score		BIG_BAD1	5.0
-
-# meta		BIG_BAD2	(JR_FRAMED_DIGITS || JR_FRAMED_WORDS || JR_UNIBABBLE) && JR_UNIBABBLE
-# score     BIG_BAD2	5.0
-
-
 
