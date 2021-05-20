@@ -3,10 +3,9 @@ ifplugin Mail::SpamAssassin::Plugin::CHAOS
 	# Set the plugin scoring mode: Tag, Manual, AutoISP - Default: Tag
 	chaos_mode Tag
 
-	# Set these values for AutoISP mode
+	# Set this value for AutoISP mode
 	chaos_tag 7
-	chaos_high 14
-	chaos_max 28
+
 	##########################################################################
 	
 	# Framed/Bracketed Counts, Digits, and Words
@@ -47,11 +46,12 @@ ifplugin Mail::SpamAssassin::Plugin::CHAOS
 		
     # Admin Fraud Messages
 	header  JR_ADMIN_FRAUD			eval:check_admin_fraud()
-	body	JR_ADMIN_BODY			eval:check_admin_fraud_body()
-
-	#### The following are information callouts only, except in Auto Modes ####
+	# body	JR_ADMIN_BODY			eval:check_admin_fraud_body()
 	
-	header  JR_HAS_SENDGRID			eval:check_for_sendgrid()
+	body	JR_BODY_TO_ADDR   		eval:check_email_greets()
+
+	## The following are IMMUTABLE information callouts only (except Auto) ##
+	
 	header	JR_MAILER			eval:mailer_check()
 	body    JR_ARCHIVE_ATTACHED		eval:id_attachments()
 
