@@ -3,7 +3,7 @@
 Mail::SpamAssassin::Plugin::CHAOS
 
         Version: 1.1.2
-    Name: "A Little Whacked"
+        Name: "A Little Whacked"
 
 # SYNOPSIS
 
@@ -539,4 +539,3 @@ describe it, and score it in standard SA fashion.
 # AVAILABILITY
 
 - Visit the project's site for the latest updates: https://github.com/telecom2k3/CHAOS/
-
