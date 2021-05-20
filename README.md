@@ -3,7 +3,7 @@
 Mail::SpamAssassin::Plugin::CHAOS
 
         Version: 1.1.2
-    Name: "A Little Whacked"
+        Name: "A Little Whacked"
 
 # SYNOPSIS
 
