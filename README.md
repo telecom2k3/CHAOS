@@ -22,10 +22,11 @@ Mail::SpamAssassin::Plugin::CHAOS
         endif
 
 
+- This module adds a little "Awesome Sauce" to your SpamAssassin installation.
 
 # DESCRIPTION
 
-This is a SpamAssassin module that provides a variety of: Callouts, Handlers, And Object Scans (CHAOS).  To assist one's pursuit of Ordo Ab Chao, this SpamAssassin plugin provides over 20 unique Eval rules.  It does a lot of counting.
+This is a SpamAssassin module that provides a variety of: Callouts, Handlers, And Other Stuff (CHAOS).  To acquire Ordo Ab Chao, this SpamAssassin plugin provides over 20 unique Eval rules.  It does a lot of counting.
 
 This plugin demonstrates SpamAssassin's relatively new (3.4) dynamic scoring capabilities:
 
@@ -258,9 +259,8 @@ Default()=10
 Header field. When this number is set the rule, JR\_REF\_XS\_DOM, is set.
 The count of domain references is displayed in the default description.
 
--
-This rule is scored at a callout level of 0.01 in Tag mode and a fixed score
-in auto mode.  In Manual mode, <THIS\_RULENAME> is scored  with whatever
+- This rule is scored at a callout level of 0.01 in Tag mode and a fixed
+score in auto mode.  In Manual mode, <THIS\_RULENAME> is scored  with whatever
 <THIS\_SCORE> and <THIS\_DESCRIBE>, in the standard  SpamAssassin fashion.
 
 ## check\_cc\_public\_name()
@@ -332,9 +332,8 @@ an informative display or your system's capabilities.  This rule is scored at
 a callout level of 0.01 in all modes of operation.  You may change the rule
 name and description as desired.
 
--
-There is a single Octal digit, that controls what (if any) information is
-presented in the report:
+- There is a single Octal digit, that controls what (if any)
+information is presented in the report:
 
         _______________________________
         |         WEIGHT/VALUE        |
