@@ -2,24 +2,24 @@
 
 Mail::SpamAssassin::Plugin::CHAOS
 
-        Version: 1.1.2
-        Name: "A Little Whacked"
+    Version: 1.2.0
+    Name: "Harmony"
 
 # SYNOPSIS
 
 - Usage:
 
-            ifplugin Mail::SpamAssassin::Plugin::CHAOS
-                    chaos_mode Manual
-                    header          JR_UNIBABBLE        eval:from_lookalike_unicode()
-                    describe        JR_UNIBABBLE        From Name Character Spoofs
-                    score           JR_UNIBABBLE        3.0
-                    ...
-                    header          JR_SUBJ_EMOJI       eval:check_for_emojis()
-                    header          JR_FRAMED_WORDS     eval:framed_message_check()
-                    header          JR_TITLECASE        eval:subject_title_case()
-                    ...
-            endif
+        ifplugin Mail::SpamAssassin::Plugin::CHAOS
+            chaos_mode Manual
+            header      JR_UNIBABBLE        eval:from_lookalike_unicode()
+            describe    JR_UNIBABBLE        From Name Character Spoofs
+            score       JR_UNIBABBLE        3.0
+            ...
+            header      JR_SUBJ_EMOJI       eval:check_for_emojis()
+            header      JR_FRAMED_WORDS     eval:framed_message_check()
+            header      JR_TITLECASE        eval:subject_title_case()
+            ...
+        endif
 
 
 
@@ -29,9 +29,9 @@ This is a SpamAssassin module that provides a variety of: Callouts, Handlers, An
 
 This plugin demonstrates SpamAssassin's relatively new (3.4) dynamic scoring capabilities:
 
-        + Use PERL's advanced arithmetic functions.
-        + Dynamic, Variable, and Conditional scoring.
-        + Adaptive scoring (baseline reference).
+    + Use PERL's advanced arithmetic functions.
+    + Dynamic, Variable, and Conditional scoring.
+    + Adaptive scoring (baseline reference).
 
 This module can operate in the following modes:
 
@@ -50,9 +50,9 @@ This value is set in the .cf configuration file.
     Changing this value will increase or decrease ALL scores provided by
     this module in Auto mode.
 
-            Default Values
-            --------------
-            chaos_tag 7
+        Default Values
+        --------------
+        chaos_tag 7
 
 
 - In a pure-play, basic SpamAssassin environment, try setting this to 4.
@@ -250,6 +250,19 @@ in the standard  SpamAssassin fashion.
 - The number of \*characters\* that can appear in the Reply-To field is
 tunable.  The default value() is 175.
 
+## check\_reference\_doms()
+
+Default()=10
+
+- This counts the number of domain references within any the Reference:
+Header field. When this number is set the rule, JR\_REF\_XS\_DOM, is set.
+The count of domain references is displayed in the default description.
+
+-
+This rule is scored at a callout level of 0.01 in Tag mode and a fixed score
+in auto mode.  In Manual mode, <THIS\_RULENAME> is scored  with whatever
+<THIS\_SCORE> and <THIS\_DESCRIBE>, in the standard  SpamAssassin fashion.
+
 ## check\_cc\_public\_name()
 
 Default()=25
@@ -310,6 +323,35 @@ services.  These services are grouped as Public (bit.ly, etc.) and Private
 is set to a callout value of 0.01.  In Manual mode, the rule can be <NAMED>,
 <DESCRIBED>, and <SCORED> in standard SpamAssassin fashion.
 
+## systeminfo()
+
+Default()=7
+
+- Strut your stuff with thie Eval.  This tags every message with
+an informative display or your system's capabilities.  This rule is scored at
+a callout level of 0.01 in all modes of operation.  You may change the rule
+name and description as desired.
+
+-
+There is a single Octal digit, that controls what (if any) information is
+presented in the report:
+
+        _______________________________
+        |         WEIGHT/VALUE        |
+        |_____________________________|
+        |    4    |    2    |    1    |
+        |_________|_________|_________|
+        |  CHAOS  |   SA    |  PERL   |
+        |_________|_________|_________|
+        | 1 = ON  | 1 = ON  | 1 = ON  |
+        | 0 = OFF | 0 = OFF | 0 = OFF |
+        |_________|_________|_________|
+
+        Examples: 0 = No version info displayed
+                  7 = All version info displayed
+                  4 = Only CHAOS version displayed
+
+
 ## check\_honorifics()
 
 - This tests the From Name field for honorifics (Mr./Mrs./Miss/Barrister,
@@ -360,7 +402,7 @@ SOBIG and SOBER worms.
 
 - In Tag mode the rulename can be whatever you like, however the score is
 fixed at a callout level of 0.01.  In Manual mode, you may name the rule,
-describe it, and score it as desired, in standard SA fashion.
+describe it, and score it in standard SA fashion.
 
 ## check\_admin\_fraud\_body()
 
@@ -369,8 +411,6 @@ Exceeded, etc.\] messages.  This test is more expensive than standard Body
 rules which are pre-compiled with RE2C.  It's not bad, but still something to
 consider.
 
-    In Auto mode, JR\_ADMIN\_BODY is set to a high watermark value of ${chaos\_tag}.
-
 - In Tag mode the rulename can be whatever you like, however the score is
 fixed at a callout level of 0.01.  In Manual mode, you may name the rule,
 describe it, and score it in standard SA fashion.
@@ -378,7 +418,8 @@ describe it, and score it in standard SA fashion.
 ## check\_email\_greets()
 
 - This is a Body test that looks for common phrases and greetings using
-the User-Part of the E-Mail address.
+the User-Part of the E-Mail address.  If there is a match, rule
+"JR\_BODY\_TO\_ADDR" is set.  Example: "Hi username"...
 
 - In Tag mode the rulename can be whatever you like, however the score is
 fixed at a callout level of 0.01.  In Manual mode, you may name the rule,
@@ -393,34 +434,34 @@ describe it, and score it in standard SA fashion.
 
 - **X-Header Detections**
 
-            JR_MAILER_BAT *     JR_SENDBLUE *           JR_OUTLOOK_2003
-            JR_MAILER_PHP *     JR_GEN_XMAILER *        JR_OUTLOOK_2007
-            JR_CHILKAT *        JR_ATL_MAILER           JR_OUTLOOK_2010
-            JR_MAILKING *       JR_SWIFTMAILER *        JR_OUTLOOK_2013
-            JR_VIRUS_MAILERS *  JR_OUTLOOK_EXPRESS *    JR_OUTLOOK_2016
-            JR_CAMPAIGN_PRO *   JR_MAROPOST *           JR_MAILCHIMP *
-            JR_APPLE_DEVICE     JR_CCONTACT             JR_SAILTHRU
-            JR_FACEBOOK         JR_ZOHO                 JR_CHEETAH
-            JR_XYZMAILER        JR_BLUESTREAK           JR_NEOLANE
-            JR_ORACLE_XPRESS    JR_ESPUTNIK             JR_ZIMBRA
-            JR_BRONTO *         JR_MIMELITE             JR_MSGSEND
-            JR_MAILGUN          JR_COLDFUSION           JR_163_HMAIL
-            JR_CREATESEND       JR_WHATCOUNTS           JR_MAILSENDER *
-            JR_SENDY            JR_ATMAIL               JR_ASPNET *
-            JR_MS_CDO           JR_PLACEWISE            JR_MARSHALL
-            JR_MAILBEE          JR_ECP_MAIL             JR_PHP7_MAIL
-            JR_AOL_WEBMAIL      JR_IBM_TRAVELER         JR_KEYS_MAIL
-            JR_NODEMAILER *     JR_REACHMAIL *          JR_SAP_WEAVER
-            JR_FB_MTA           JR_DMDROID              JR_MARSHALL
-            JR_OPEN_XCHANGE     JR_FOXMAIL              JR_CLAWS_MAIL
-            JR_FISHBOWL
+        JR_MAILER_BAT *     JR_SENDBLUE *           JR_OUTLOOK_2003
+        JR_MAILER_PHP *     JR_GEN_XMAILER *        JR_OUTLOOK_2007
+        JR_CHILKAT *        JR_ATL_MAILER           JR_OUTLOOK_2010
+        JR_MAILKING *       JR_SWIFTMAILER *        JR_OUTLOOK_2013
+        JR_VIRUS_MAILERS *  JR_OUTLOOK_EXPRESS *    JR_OUTLOOK_2016
+        JR_CAMPAIGN_PRO *   JR_MAROPOST *           JR_MAILCHIMP *
+        JR_APPLE_DEVICE     JR_CCONTACT             JR_SAILTHRU
+        JR_FACEBOOK         JR_ZOHO                 JR_CHEETAH
+        JR_XYZMAILER        JR_BLUESTREAK           JR_NEOLANE
+        JR_ORACLE_XPRESS    JR_ESPUTNIK             JR_ZIMBRA
+        JR_BRONTO *         JR_MIMELITE             JR_MSGSEND
+        JR_MAILGUN          JR_COLDFUSION           JR_163_HMAIL
+        JR_CREATESEND       JR_WHATCOUNTS           JR_MAILSENDER *
+        JR_SENDY            JR_ATMAIL               JR_ASPNET *
+        JR_MS_CDO           JR_PLACEWISE            JR_MARSHALL
+        JR_MAILBEE          JR_ECP_MAIL             JR_PHP7_MAIL
+        JR_AOL_WEBMAIL      JR_IBM_TRAVELER         JR_KEYS_MAIL
+        JR_NODEMAILER *     JR_REACHMAIL *          JR_SAP_WEAVER
+        JR_FB_MTA           JR_DMDROID              JR_MARSHALL
+        JR_OPEN_XCHANGE     JR_FOXMAIL              JR_CLAWS_MAIL
+        JR_FISHBOWL         JR_ICEWARP              JR_KLAVIYO *
 
 
 - **PHP Script Detections**
 
     This checks for the presence of headers that indicate that the message was sent by a bad or exploited PHP script.  A single immutable rulename with a callout score is returned, unless in Auto mode:
 
-               JR_PHP_SCRIPT
+           JR_PHP_SCRIPT
 
 
 - **UTF-8 Checks**
@@ -430,36 +471,36 @@ describe it, and score it in standard SA fashion.
  scored with a callout value of 0.01 in all modes.  The rulenames returned
  by this Eval describe either Quoted-Printable or Base-64 encodings:
 
-            JR_SUBJ_UTF8_QP     JR_SUBJ_UTF8_B64
-            JR_FROM_UTF8_QP     JR_FROM_UTF8_B64
-            JR_TO_UTF8_QP       JR_TO_UTF8_B64
-            JR_REPLY_UTF8_QP    JR_REPLY_UTF8_B64
+        JR_SUBJ_UTF8_QP     JR_SUBJ_UTF8_B64
+        JR_FROM_UTF8_QP     JR_FROM_UTF8_B64
+        JR_TO_UTF8_QP       JR_TO_UTF8_B64
+        JR_REPLY_UTF8_QP    JR_REPLY_UTF8_B64
 
 - **User-Agent Checks**
 
-- This checks for the presence of a User-Agent header and tags
- agents with callout values only:
+- This checks for the presence of a User-Agent header.  All such rules are scored at callout values only except those marked with an Asterisk\*.  These are assigned a score in Auto mode.
 
-            JR_ROUNDCUBE        JR_HORDE
-            JR_THUNDERBIRD      JR_UNK_USR_AGENT
-            JR_ALPINE           JR_MAC_OUTLOOK
-            JR_MUTT             JR_EMCLIENT
-            JR_ANDROID          JR_SQUIRRELMAIL
-            JR_DADDYMAIL        JR_KMAIL
-            JR_REDCAPPI
+        JR_ROUNDCUBE        JR_HORDE
+        JR_THUNDERBIRD      JR_UNK_USR_AGENT
+        JR_ALPINE           JR_MAC_OUTLOOK
+        JR_MUTT             JR_EMCLIENT
+        JR_ANDROID          JR_SQUIRRELMAIL
+        JR_DADDYMAIL        JR_KMAIL
+        JR_REDCAPPI         JR_TRAYSOFT
+        JR_JINO *
 
 - **Miscellaneous Checks**
 
 - Various checks for headers that indicate a bad message.  A variety of Mailchimp sanity checks are performed.  JR\_EXCHANGE is a callout rule set when Microsoft Exchange Server headers are detected.  Many Microsoft Exchange header sanity checks are also performed.  JR\_DUP\_HDRS hits whenever multiple IDENTICAL header lines appear in a message.  There are also tests, JR\_MULTI\_HDRS, for headers that should never appear more than once.  There are also checks for headers that shouldn't appear in the presence of other headers.
 
-            JR_BOGUS_HEADERS *      JR_BAD_CHIMP *
-            JR_X_BEENTHERE *        JR_X_SENTBY *
-            JR_EXCHANGE             JR_EXCHANGE_AUTH *
-            JR_EXCH_BAD_AUTH *      JR_EXCH_ATTACH *
-            JR_EXCHANGE_TYPE *      JR_X_UNVERIFIED *
-            JR_DUP_HDRS *           JR_MULTI_HDRS *
-            JR_PRI_MULTI *          JR_BULK *
-            JR_SGRID_FWD *          JR_SGRID_DIRECT *
+        JR_BOGUS_HEADERS *      JR_BAD_CHIMP *
+        JR_X_BEENTHERE *        JR_X_SENTBY *
+        JR_EXCHANGE             JR_EXCHANGE_AUTH *
+        JR_EXCH_BAD_AUTH *      JR_EXCH_ATTACH *
+        JR_EXCHANGE_TYPE *      JR_X_UNVERIFIED *
+        JR_DUP_HDRS *           JR_MULTI_HDRS *
+        JR_PRI_MULTI *          JR_BULK *
+        JR_SGRID_FWD *          JR_SGRID_DIRECT *
 
 - All rules are callout values unless marked with an asterisk (\*).  These are scored at various fixed rates when in Auto mode.
 
@@ -479,8 +520,8 @@ describe it, and score it in standard SA fashion.
 
 - The following immutable rules are specific callouts for JPG, ZIP, CAB, and GZ files.
 
-        JR_ATTACH_ZIP               JR_ATTACH_GZIP
-        JR_ATTACH_JPEG              JR_ATTACH_CAB
+        JR_ATTACH_ZIP       JR_ATTACH_GZIP
+        JR_ATTACH_JPEG      JR_ATTACH_CAB
         JR_ATTACH_IMAGE
 
 
@@ -503,9 +544,9 @@ describe it, and score it in standard SA fashion.
 
 - CHAOS.pm supports versioning and can provide additonal details about your SpamAssassin configuration:
 -
-        perl /$PATH\_TO/CHAOS.pm \[-v, --version\]  # CHAOS.pm, PERL, SA Version
-        perl /$PATH\_TO/CHAOS.pm \[-V, --verbose\]  # Above + PERL libraries for SA
-        perl /$PATH\_TO/CHAOS.pm \[-VV, --very\]    # Above + SA physical file paths
+    perl /$PATH\_TO/CHAOS.pm \[-v, --version\]  # CHAOS.pm, PERL, SA Version    
+    perl /$PATH\_TO/CHAOS.pm \[-V, --verbose\]  # Above + PERL libraries for SA
+    perl /$PATH\_TO/CHAOS.pm \[-VV, --very\]    # Above + SA physical file paths
 
 # MORE DOCUMENTATION
 
