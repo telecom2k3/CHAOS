@@ -1,0 +1,104 @@
+CHAOS.pm: Callouts, Handlers, And Other Stuff
+https://github.com/telecom2k3/CHAOS
+
+Version 1.2.1
+Date: July 19.2021
+	• Corrected a regex in the Fraud Baud(y) rules where a normalized UTF8 character appeared un-hexed.
+	• Additional Fraud Subject and Fraud Body rules added.
+	• Additional duplicate Exchange Header rule added.
+	• New User-Agents added.
+	• New X-Mailers added.
+	• Fixed erroneous header match in check_email_greets Eval that triggered during during SA lint check.
+Notes
+There are no configuration file changes needed in this release.
+
+Version 1.2.0
+Date: June 21, 2021
+	• New Eval, check_reference_doms() controls how many @domain.tld references can appear in a Reference header.
+	• Strut your stuff and rock your wares with a new Eval, systeminfo(). This callout-only tags Emails with any combination of CHAOS, SpamAssassin, and PERL versions, followed by a description:
+CHAOS: v1.2.0 SA: v3.4.6 PERL: v5.26.1 - This system rocks!
+	• (Very)? Verbose versioning [-V, -VV] returns the Unicode Version of your PERL.
+	• Continued additions to Admin Fraud and Fraud Body rules.
+	• Additions to First Names, X-Mailers, User-Agents, Public Short URLs.
+	• Fixed error messages thrown when check_email_greets() Eval handles Emails with only BCC recipients.
+	• Complete removal of chaos_high and chaos_max score levels. CHAOS now pegs any of its scores to a single chaos_tag value.
+Notes
+Auto mode scoring has been changed in that any single rule hit will not force Emails to be tagged as spam.
+Auto mode scores are simply an arithmetic fraction of the configured chaos_tag value.
+
+Version 1.1.2
+Date: May 20, 2021
+	• All kinds of useful information added to mailer_check(); tons of stuff.
+	• New checks for Identical and Multiple Headers added.
+	• Exchange Header detection and sanity checking added.
+	• All kinds of additional header sanity checks have been added.
+	• New Eval, check_email_greets(), per SA-Users 5/7, "Hi $emailuserpart" - with internationalizations.
+	• Complete Versioning is provided:
+perl /$PATH_TO/CHAOS.pm [-v, --version] # CHAOS.pm, PERL, SA Version
+perl /$PATH_TO/CHAOS.pm [-V, --verbose] # Above + PERL libraries for SA
+perl /$PATH_TO/CHAOS.pm [-VV, --very] # Above + SA physical file paths
+	• SendGrid Eval merged into mailer_check and now can generate two rules:
+JR_SGRID_DIRECT (SendGrid or Partners)
+JR_SGRID_FWD (Forwarded via ISP/References)
+	• Cleanup of rule "Description" field output throughout the module.
+	• Additonal additions to ADMIN_FRAUD Body AND Subject rules.
+	• MMs added to Honorifics.
+	• The ADMIN_FRAUD Body Eval/rule is commented out by default now in the CHAOS.cf file.
+Notes
+Parsing an Email body from within a plugin is neither easy or efficient. It is far better to have the rules compiled via sa-compile/re2c. The ADMIN_FRAUD Body rules are still there and have even been expanded; just commented out by default in the CHAOS.cf file.
+I'm happy with the progress of the mailer_check() Eval. It is not quite a complete EMail fingerprint/signature kit, but there is now sufficient data returned to make it a good time to work towards publishing some rulesets.
+Surprisingly, the Multiple Header detections have been quite useful at detecting infected Exchange Servers, particularly noted with the "X-MS-Exchange-CrossTenant-FromEntityHeader" header.
+
+Version 1.1.1
+Date: April 7, 2021
+	• Correction of Title Case eval routine triggering on Subjects with ALL UPPERCASE words.
+	• General improvements and sanity checks to the Title Case eval routine. Also reduced its score.
+	• More mailer_check() definitions added.
+	• Additional LATIN character detections added to Unicode/Unibabble Evals.
+	• MS Cabinet files now called out in attachment check
+  
+Version 1.1.0
+Date: March 26, 2021
+Name: "Postreleasem Depression"
+New Features
+	• Major release.
+	• Added {chaos_mode}: Tag, Manual, AutoISP.
+	• New Eval: check_to_public_name(), JR_CC_PUB_NONAME, many CC recipients without a name.
+	• New Eval: check_to_public_name(), JR_TO_PUB_NONAME, many TO recipients without a name.
+	• New Eval: eval:from_no_vowels(), JR_FROM_NO_VOWEL, From Name has words but no vowels.
+Changed Functions
+	• Changed mailer_check() to include the PHP Script detection.
+	• mailer_check() rules are immutable and will generate Callout scores unless in Auto mode.
+	• Remove Unbalanced Bracket rule. Callout rule from new check_for_brackets() has total count.
+	• Rule JR_HAS_MANY_BRACKETS in check_for_brackets() changed to JR_SUBJ_BRACKETS in Auto mode.
+	• Split Uni-Babble rules up into their individual parts.
+	• Added ZIPX detection in Eval: id_attachments().
+	• New X-Mailer callouts added to mailer_check()
+	• New PHP Scripts added to mailter_check()
+Uni-Babble Fixes
+	• Complete integration of the LATIN and LATIN SUPPLEMENTAL codesets for Alphabet detection.
+	• Fix for incorrect scoring of LATIN SUPPLEMENT characters.
+	• Latin Digits can appear in multiple alphabets, so they are now ignored when matching Unicode codesets.
+General Fixes
+	• Fixes for excessive Auto Scoring.
+	• Changing references from Self-Scoring to Auto-Scoring.
+	• Corrected Description field operation throughout the module.
+	• Documentation corrections.
+	• Removed timezones from Framed Words/Messages rule.
+	• New Admin Fraud messages added.
+  
+Version 1.0.5
+Date: Feb 10, 2021
+Name: Initial public release
+	• Added first_name_basis()
+	• Added subject_title_case()
+	• Fixed holdoff scoring on Emojis
+	• Added Configuration File variables
+	• Moved from YARAssassin to a separate CHAOS project
+  
+Version 1.0.2
+Date: Dec 20, 2021
+	• Private YARAssassin release
+	• Adaptive scoring, hard-coded in the PERL module
+
+From <https://github.com/telecom2k3/CHAOS/wiki/CHANGELOG> 
